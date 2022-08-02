@@ -1,0 +1,35 @@
+//SPDX-License-Identifier:MIT
+pragma solidity ^0.8.3;
+
+//事件：一种记录当前智能合约运行状态的方法 但是并不记录在状态变量中 而是会体现在区块链浏览器上 或体现在交易记录中的logs 
+//通过事件，可以查询一些我们改变过的状态 
+//创建事件合约
+contract Event{
+    event Log(string messgae, uint val) ;//声明事件 大写开头  括号内 事件要报告的数据类型 定义：字符串类型messgae,无符号整数类型val
+    event IndexedLog(address indexed sender,uint val );//在类型之后规定一个索引 （地址类型 已索引）——该标记过的变量 就可以在链外进行搜索查询了 
+    //丿up to 3 index 事件中 最多只能定义3个检索变量
+
+
+
+    //写一个方法函数 触发事件 采用 关键词emit 事件名称log 事件中要触发的变量的值 
+    function example () external{
+        emit Log("foo",456);
+        emit IndexedLog (msg.sender,789);//比如说：a用户去调用它，这个值就会被记录为a用户的地址；
+        //前端用web3或者ethers(sdk类的工具）可以做个查询:指定用a用户的地址，查询它所有报出来过的事件——可以完成一些数据检索类的操作 ——类似于传统数据库的检索 
+
+    }
+//函数被调用时，就会被触发事件，事件会汇报到这个交易记录的logs里
+//这个函数 虽然没有写入和读取状态变量 他也是一个写入方法 并不能被标记为view 或者pure 
+//——不能标记只读方法 因为确实改变了链上的状态 改变的是事件的状态 链上为你记录了信息 所以必须是写入方法
+
+    //如同从a点向b点发送消息一样 包含变量（地址都是索引地址  字符串变量 消息的内容）
+    event Message (address indexed _from, address indexed _to, string message);
+    //写函数去触发他,消息的发送者就是合约的调用者,所以在传入参数的时候传入接受者的地址就可以，字符串类型+calldata的存储位置 
+    function sendMessage(address _to, string calldata message) external {
+        //通过emit触发事件，变量（调用者，接受者，信息）
+        emit Message( msg.sender, _to, message);
+    }
+//在链外可以查询到这个事件，
+}
+
+//如果我们是写一个消息调用，可以用状态变量 也可以用事件 但是事件的存储 更节约gas 
